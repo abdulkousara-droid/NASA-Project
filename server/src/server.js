@@ -1,29 +1,20 @@
 const http = require("http");
 
-const mongoose = require("mongoose");
-
 const app = require("./app");
+const { seedDefaultLaunch } = require("./models/launches.model");
+
+const { mongoConnect } = require("./services/mongo");
 
 const { loadPlanetsData } = require("./models/planets.model");
 
 const PORT = process.env.PORT || 8000;
 
-const MONGO_URL =
-  "mongodb+srv://NASA-Api:GmYnxwmmCLaPs66j@cluster0.daa6dgh.mongodb.net/nasa";
-
 const server = http.createServer(app);
 
-mongoose.connection.once("open", () => {
-  console.log("MongoDB connection ready!");
-});
-
-mongoose.connection.on("error", (err) => {
-  console.error(err);
-});
-
 async function startServer() {
-  await  mongoose.connect(MONGO_URL);
+  await mongoConnect();
   await loadPlanetsData();
+  await seedDefaultLaunch();
 
   server.listen(PORT, () => {
     console.log(`Server started on port ${PORT}...`);
